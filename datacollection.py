@@ -64,7 +64,8 @@ def main():
 
     with open('time_taken.txt', 'w') as file:
         file.write('Data collection: {:.2f} seconds'.format(time_taken))
-        print('Time taken:', time_taken, 'seconds')
+        print('Time taken for collecting data from server:', time_taken, 'seconds')
 
 if __name__ == '__main__':
     main()
+    

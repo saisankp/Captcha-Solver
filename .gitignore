@@ -1,1 +1,5 @@
-/images
+/individual-images
+/generated-images
+/pip
+/tensorflow
+/opencv
