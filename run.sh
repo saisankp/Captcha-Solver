@@ -1,6 +1,6 @@
 # Preparing for running our code
 source env/bin/activate
-source .xsessionrc
+source .environment
 
 # 1. Data collection from server
 python datacollection.py --url https://cs7ns1.scss.tcd.ie/?shortname=saisankp --output-directory individual-images

@@ -60,10 +60,10 @@ make install
 cd ../..
 
 # Activate environment variables
-# Now that OpenCV is installed from source, we can add "$HOME/.local/" to the "LD_LIBRARY_PATH" environment variable in our shell's session environment file (this is already done in .xsessionrc)
+# Now that OpenCV is installed from source, we can add "$HOME/.local/" to the "LD_LIBRARY_PATH" environment variable in our shell's session environment file (this is already done in .environment)
 # Since we don't have sudo commands, we can't do "sudo ln -s /usr/local/lib64/pkgconfig/opencv.pc /usr/share/pkgconfig/" to symlink this OpenCV installation to our system
-# We can overcome this by adding an environment variable "PKG_CONFIG_PATH" in our shell's session environment (this is already done in .xsessionrc)
-source .xsessionrc
+# We can overcome this by adding an environment variable "PKG_CONFIG_PATH" in our shell's session environment (this is already done in .environment)
+source .environment
 
 # Allow python 2.7 to find our OpenCV installation
 # Now that we have OpenCV installed and the .pc file can be found, we can add the .so file to our environment

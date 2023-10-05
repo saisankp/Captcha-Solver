@@ -22,7 +22,6 @@ def verifyCaptchaRequest(length, count):
 
 
 # Parse arguments from the user to generate captchas
-# This function was inspired from sample-code.zip from Dr. Ciaran Mc Goldrick
 def parseArguments(parser):
     parser = argparse.ArgumentParser()
     argumentsAndDescriptions = {
@@ -106,7 +105,7 @@ def main():
     time_taken = end_time - start_time
 
     with open('time_taken.txt', 'w') as file:
-        file.write('Training data generation: {:.2f} seconds'.format(time_taken))
+        file.write('Training data generation for {0} images: {1} seconds'.format(arguments.count, time_taken))
         print('Time taken for generating training images:', time_taken, 'seconds')
 
 if __name__ == '__main__':
