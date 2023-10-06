@@ -36,5 +36,5 @@ Project 2 for Scalable Computing - CS7NS1
   - [ ] Summary validation set details; submitty solving/solution file generation summary.
 
 [saisankp]: https://github.com/saisankp
-[hamzah7k]: https://github.com/hamzah7k
+[hakhan]: https://github.com/hamzah7k
  
