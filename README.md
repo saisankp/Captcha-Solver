@@ -9,6 +9,7 @@ Project 2 for Scalable Computing - CS7NS1
 |     Hamzah Khan    |  23335427  | Computer Science - Data Science      |    [hamzah7k][hakhan]      |
 
 ## Code TODO
+- [x] Get setup scripts + package installations working on Raspberry Pi (Done by Prathamesh)
 - [x] Image collection from server (Done by Prathamesh)
 - [ ] Training data generation (in progress, need to work together)
   - [ ] Finding font
