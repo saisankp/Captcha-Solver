@@ -10,6 +10,6 @@ python datacollection.py --url https://cs7ns1.scss.tcd.ie/?shortname=cheny28 --o
 python datacollection.py --url https://cs7ns1.scss.tcd.ie/?shortname=corralp --output-directory cross-check2
 
 # 2. Training data generation
-python generation.py --width 128 --height 64 --length 5 --symbols symbols.txt --count 140800 --output-dir generated-images
+python generation.py --width 128 --height 64 --min-length 1 --max-length 6 --symbols symbols.txt --count 140800 --output-dir generated-images --font EamonU
 
 # Todo more...
