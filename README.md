@@ -6,9 +6,10 @@ Project 2 for Scalable Computing - CS7NS1
 |    Student Name    | Student ID |                Course                |      GitHub Username       |
 |:------------------:|:----------:|:------------------------------------:|:--------------------------:|
 |   Prathamesh Sai   |  19314123  | Integrated Computer Science (M.C.S.) |    [saisankp][saisankp]    |
-|     Hamza Khan     |  Todo      |             todo                     |       [todo][todo]         |
+|     Hamzah Khan    |  23335427  | Computer Science - Data Science      |    [hamzah7k][hakhan]      |
 
 ## Code TODO
+- [x] Get setup scripts + package installations working on Raspberry Pi (Done by Prathamesh)
 - [x] Image collection from server (Done by Prathamesh)
 - [ ] Training data generation (in progress, need to work together)
   - [ ] Finding font
@@ -36,5 +37,5 @@ Project 2 for Scalable Computing - CS7NS1
   - [ ] Summary validation set details; submitty solving/solution file generation summary.
 
 [saisankp]: https://github.com/saisankp
-[todo]: https://github.com/todo
+[hakhan]: https://github.com/hamzah7k
  
