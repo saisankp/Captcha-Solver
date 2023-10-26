@@ -62,7 +62,7 @@ def main():
     end_time = time.time()
     time_taken = end_time - start_time
 
-    with open('time_taken.txt', 'w') as file:
+    with open('data_collection_time_taken.txt', 'w') as file:
         file.write('Data collection: {:.2f} seconds'.format(time_taken))
         print('Time taken for collecting data from server:', time_taken, 'seconds')
 
