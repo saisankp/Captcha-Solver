@@ -1,8 +1,8 @@
-# NOTE: Make sure to open this file in WSL i.e. Windows Subsystem for Linux (not powershell/git bash)
+# NOTE: Make sure to open this file in WSL i.e. Windows Subsystem for Linux (not command prompt/git bash)
 
 python -m pip install virtualenv 
 
-# Activate the environment (use .\windowsEnv\Scripts\activate.bat on WSL if you're using that)
+# Activate the environment (use .\windowsEnv\Scripts\activate.bat on command prompt if you insist on using that)
 source windowsEnv/Scripts/activate
 
 # Install pip for python
