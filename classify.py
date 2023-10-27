@@ -15,7 +15,6 @@ from tensorflow import keras
 def parseArguments(parser):
     parser = argparse.ArgumentParser()
     argumentsAndDescriptions = {
-    '--width': ('Width of the generated captcha images', int),
     '--model-name': ('Model name to use for classification', str),
     '--captcha-dir': ('Where to read the captchas from', str),
     '--output': ('File where the classifications should be saved', str),
