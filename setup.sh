@@ -1,10 +1,12 @@
+# NOTE: Make sure to open this file after ssh-ing into the Raspberry Pi
+
 # Since we are on a Raspberry Pi (ARMV7 32bit), installing the packages we need is extremely tricky.
-# This relates to my major learning in this module which is that IoT devices are extremely limited!
-# However, my other major learning in this module is that there are always workarounds to everything, so this script shows how I did it :)
+# This relates to our major learning in this module which is that IoT devices are extremely limited!
+# However, our other major learning in this module is that there are always workarounds to everything, so this script shows how we did it :)
 
 # This Raspberry Pi comes installed with Python 2.7.18. After many sleepless nights of trialing Python 3.5, 3.6, 3.7 and 3.8, keeping the original Python version 2.7.18 is best as it's compatible for using Tensorflow AND OpenCV on ARMV7 without errors with the quickest "import".
 # Furthermore, installing other Python 3 versions often require sudo commands (a permission we DON'T have) to be in the /usr/lib directory (technically it can be installed in other directories but strange errors show up later such as missing header files, it's best to stay clear!).
-# Here is how I installed the packages:
+# Here is how we installed the packages:
 
 python -m pip install virtualenv 
 
