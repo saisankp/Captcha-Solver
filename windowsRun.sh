@@ -1,5 +1,7 @@
-# Preparing for running our code
-.\windowsEnv\Scripts\activate.bat
+# NOTE: Make sure to open this file in WSL i.e. Windows Subsystem for Linux (not command prompt/git bash)
+
+# Activate the environment (use .\windowsEnv\Scripts\activate.bat on command prompt if you insist on using that)
+source windowsEnv/Scripts/activate
 
 # 1. Data collection from server, run "ls | wc -l" in folders to find amount of files downloaded, it should return 2000 (EXPERIMENT CONCLUSION: RUN USING RASPBERRY PI FOR THE BEST TIME)
 python datacollection.py --url https://cs7ns1.scss.tcd.ie/?shortname=saisankp --output-directory saisankp-images
