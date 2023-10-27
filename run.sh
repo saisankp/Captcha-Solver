@@ -16,7 +16,7 @@ python process-images.py --image-folder generated-images/training/images --proce
 python process-images.py --image-folder generated-images/validation/images --processed-image-folder processed-validation-images
 
 # 3. Train our model with the generated images (EXPERIMENT CONCLUSION: RUN USING WSL FOR ENOUGH TIME TO TRAIN THE MODEL)
-python train.py --width 128 --height 64 --length 6 --batch-size 32 --train-dataset processed-training-images --validate-dataset processed-validation-images --output-model-name model.h5 --symbols symbols.txt --epochs 5
+python train.py --width 128 --height 64 --length 6 --batch-size 32 --train-dataset processed-training-images --validate-dataset processed-validation-images --output-model-name model.h5 --symbols symbols.txt --epochs 8
 
 # 4. Classify the captchas to get our Submitty file (EXPERIMENT CONCLUSION: RUN USING RASPBERRY PI FOR THE BEST TIME)
 python classify.py --model-name model --captcha-dir saisankp-images --output saisankp.csv --symbols symbols.txt
