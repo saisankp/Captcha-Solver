@@ -1,0 +1,1 @@
+Training data generation for 140800 images: 460.85661792755127 seconds
