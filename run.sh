@@ -1,3 +1,5 @@
+# NOTE: Make sure to open this file after ssh-ing into the Raspberry Pi
+
 # Activate environment and variables
 source env/bin/activate
 source .environment
