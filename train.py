@@ -10,6 +10,35 @@ import argparse
 import time
 import tensorflow as tf
 import tensorflow.keras as keras
+import re
+
+def parseArguments(parser):
+    parser = argparse.ArgumentParser()
+    argumentsAndDescriptions = {
+    '--width': ('Width of captcha image', int),
+    '--height': ('Height of captcha image', int),
+    '--length': ('Length of captchas in characters', int),
+    '--batch-size': ('How many images in each training captcha batch', int),
+    '--train-dataset': ('Where to look for the training image dataset', str),
+    '--validate-dataset': ('Where to look for the validation image dataset', str),
+    '--output-model-name': ('Where to save the trained model', str),
+    '--input-model': ('Where to look for the input model to continue training', str),
+    '--epochs': ('How many training epochs to run', int),
+    '--symbols': ('File with the symbols to use in captchas', str)
+    }
+
+    for argument, (description, argument_type) in argumentsAndDescriptions.items():
+        parser.add_argument(argument, help=description, type=argument_type)
+
+    arguments = parser.parse_args()
+
+    for argument, (description, _) in argumentsAndDescriptions.items():
+            if getattr(arguments, argument.replace("--", "").replace("-", "_")) is None:
+                print("Error: Please specify {}".format(argument))
+                exit(1)
+
+    return arguments
+
 
 # To predict captcha text, we need to create a keras model to predict captchas
 # We can base the model on using a maximum length, with '$' used for captcha characters less than the maximum length
@@ -23,7 +52,6 @@ def create_model(max_captcha_length, captcha_num_symbols, input_shape, model_dep
           output_tensor = keras.layers.BatchNormalization()(output_tensor)
           output_tensor = keras.layers.Activation('relu')(output_tensor)
       output_tensor = keras.layers.MaxPooling2D(2)(output_tensor)
-
   output_tensor = keras.layers.Flatten()(output_tensor)
   output_tensor = [keras.layers.Dense(captcha_num_symbols, activation='softmax', name='char_%d'%(i+1))(output_tensor) for i in range(max_captcha_length)]
   model = keras.Model(inputs=input_tensor, outputs=output_tensor)
@@ -53,9 +81,6 @@ class ImageSequence(keras.utils.Sequence):
         y = [numpy.zeros((self.batch_size, len(self.captcha_symbols)), dtype=numpy.uint8) for i in range(self.max_captcha_length)]
 
         for i in range(self.batch_size):
-            # If there is only one image left, break so we don't get an index error
-            if len(list(self.files.keys())) == 1:
-                break
             random_image_label = random.choice(list(self.files.keys()))
             random_image_file = self.files[random_image_label]
             # Pop off image as we have used it
@@ -65,6 +90,11 @@ class ImageSequence(keras.utils.Sequence):
             rgb_data = cv2.cvtColor(raw_data, cv2.COLOR_BGR2RGB)
             processed_data = numpy.array(rgb_data) / 255.0
             X[i] = processed_data
+
+            # We swapped : and / for o and L respectively as they are not allowed in filenames
+            # Let's put them back so our model predicts accurately
+            random_image_label = random_image_label.replace('o', ':')
+            random_image_label = re.sub("L", "\\\\", random_image_label)
             # We add '$' to the right-side of the label until it is length 6 (if it is length 6 already, we don't do anything)
             random_image_label = '{:$<6}'.format(random_image_label.split('_')[0])
             for j, ch in enumerate(random_image_label):
@@ -72,94 +102,34 @@ class ImageSequence(keras.utils.Sequence):
                 y[j][i, self.captcha_symbols.find(ch)] = 1
         return X, y
 
+
 def main():
     start_time = time.time()
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--width', help='Width of captcha image', type=int)
-    parser.add_argument('--height', help='Height of captcha image', type=int)
-    parser.add_argument('--length', help='Length of captchas in characters', type=int)
-    parser.add_argument('--batch-size', help='How many images in training captcha batches', type=int)
-    parser.add_argument('--train-dataset', help='Where to look for the training image dataset', type=str)
-    parser.add_argument('--validate-dataset', help='Where to look for the validation image dataset', type=str)
-    parser.add_argument('--output-model-name', help='Where to save the trained model', type=str)
-    parser.add_argument('--input-model', help='Where to look for the input model to continue training', type=str)
-    parser.add_argument('--epochs', help='How many training epochs to run', type=int)
-    parser.add_argument('--symbols', help='File with the symbols to use in captchas', type=str)
-    args = parser.parse_args()
-
-    if args.width is None:
-        print("Please specify the captcha image width")
-        exit(1)
-
-    if args.height is None:
-        print("Please specify the captcha image height")
-        exit(1)
-
-    if args.length is None:
-        print("Please specify the captcha length")
-        exit(1)
-
-    if args.batch_size is None:
-        print("Please specify the training batch size")
-        exit(1)
-
-    if args.epochs is None:
-        print("Please specify the number of training epochs to run")
-        exit(1)
-
-    if args.train_dataset is None:
-        print("Please specify the path to the training data set")
-        exit(1)
-
-    if args.validate_dataset is None:
-        print("Please specify the path to the validation data set")
-        exit(1)
-
-    if args.output_model_name is None:
-        print("Please specify a name for the trained model")
-        exit(1)
-
-    if args.symbols is None:
-        print("Please specify the captcha symbols file")
-        exit(1)
+    # Parse arguments and exit if any are msising
+    arguments = parseArguments(argparse.ArgumentParser())
 
     captcha_symbols = None
-    with open(args.symbols) as symbols_file:
+    with open(arguments.symbols) as symbols_file:
         captcha_symbols = symbols_file.readline()
 
-    # physical_devices = tf.config.experimental.list_physical_devices('GPU')
-    # assert len(physical_devices) > 0, "No GPU available!"
-    # tf.config.experimental.set_memory_growth(physical_devices[0], True)
-
-    # with tf.device('/device:GPU:0'):
+    # Only use the CPU as our local device is limited
     with tf.device('/device:CPU:0'):
-    # with tf.device('/device:XLA_CPU:0'):
-        model = create_model(args.length, len(captcha_symbols), (args.height, args.width, 3))
-
-        if args.input_model is not None:
-            model.load_weights(args.input_model)
-
+        model = create_model(arguments.length, len(captcha_symbols), (arguments.height, arguments.width, 3))
+        if arguments.input_model is not None:
+            model.load_weights(arguments.input_model)
         model.compile(loss='categorical_crossentropy',
                       optimizer=keras.optimizers.Adam(1e-3, amsgrad=True),
                       metrics=['accuracy'])
-
         model.summary()
-
-        training_data = ImageSequence(args.train_dataset, args.batch_size, args.length, captcha_symbols, args.width, args.height)
-        validation_data = ImageSequence(args.validate_dataset, args.batch_size, args.length, captcha_symbols, args.width, args.height)
-
-        callbacks = [keras.callbacks.EarlyStopping(patience=3),
-                     # keras.callbacks.CSVLogger('log.csv'),
-                     keras.callbacks.ModelCheckpoint(args.output_model_name+'.h5', save_best_only=False)]
-
-        # Save the model architecture to JSON
-        with open(args.output_model_name+".json", "w") as json_file:
+        training_data = ImageSequence(arguments.train_dataset, arguments.batch_size, arguments.length, captcha_symbols, arguments.width, arguments.height)
+        validation_data = ImageSequence(arguments.validate_dataset, arguments.batch_size, arguments.length, captcha_symbols, arguments.width, arguments.height)
+        callbacks = [keras.callbacks.EarlyStopping(patience=3), keras.callbacks.ModelCheckpoint(args.output_model_name+'.h5', save_best_only=False)]
+        with open(arguments.output_model_name+".json", "w") as json_file:
             json_file.write(model.to_json())
-
         try:
             model.fit_generator(generator=training_data,
                                 validation_data=validation_data,
-                                epochs=args.epochs,
+                                epochs=arguments.epochs,
                                 callbacks=callbacks,
                                 use_multiprocessing=True)
         except KeyboardInterrupt:
@@ -168,10 +138,10 @@ def main():
     
     end_time = time.time()
     time_taken = end_time - start_time
-
     with open('train_time_taken.txt', 'w') as file:
         file.write('Train: {:.2f} seconds'.format(time_taken))
         print('Time taken for training the model:', time_taken, 'seconds')
+
 
 if __name__ == '__main__':
     main()
