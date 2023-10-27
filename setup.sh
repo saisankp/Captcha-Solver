@@ -6,7 +6,9 @@
 # Furthermore, installing other Python 3 versions often require sudo commands (a permission we DON'T have) to be in the /usr/lib directory (technically it can be installed in other directories but strange errors show up later such as missing header files, it's best to stay clear!).
 # Here is how I installed the packages:
 
-# Activate the environment "env" (which should have packages already)
+python -m pip install virtualenv 
+
+# Activate the environment
 source env/bin/activate
 
 # Install pip for python

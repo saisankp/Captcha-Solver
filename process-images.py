@@ -1,7 +1,9 @@
 import cv2
 import argparse
 import os
-
+from tqdm import tqdm
+import shutil
+import numpy as np
 
 def process_image(path_of_image, path_to_write_new_image):
     originalImage = cv2.imread(path_of_image)
@@ -33,8 +35,11 @@ def main():
     if not os.path.exists(args.processed_image_folder):
         os.makedirs(args.processed_image_folder)
 
+    if not os.path.exists("handle-special-characters"):
+        os.makedirs("handle-special-characters")
+
      # Iterate through every file in the specified image folder
-    for filename in os.listdir(args.image_folder):
+    for filename in tqdm(os.listdir(args.image_folder), total=len(os.listdir(args.image_folder)), desc='Processing generated captchas'):
         file_path_of_initial_image = os.path.join(args.image_folder, filename)
         file_path_of_new_image = str(os.path.join(args.processed_image_folder, filename))
         process_image(file_path_of_initial_image, file_path_of_new_image)

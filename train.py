@@ -1,46 +1,45 @@
 import warnings
-import time
 warnings.filterwarnings("ignore", category=FutureWarning)
 warnings.filterwarnings("ignore", category=DeprecationWarning)
-
 import os
 import cv2
 import numpy
 import string
 import random
 import argparse
+import time
 import tensorflow as tf
 import tensorflow.keras as keras
 
-# Build a Keras model given some parameters
-def create_model(captcha_length, captcha_num_symbols, input_shape, model_depth=5, module_size=2):
+# To predict captcha text, we need to create a keras model to predict captchas
+# We can base the model on using a maximum length, with '$' used for captcha characters less than the maximum length
+# This way, our model can predict variable length captchas without using LSTM (long short-term memory networks)
+def create_model(max_captcha_length, captcha_num_symbols, input_shape, model_depth=5, module_size=2):
   input_tensor = keras.Input(input_shape)
-  x = input_tensor
+  output_tensor = input_tensor
   for i, module_length in enumerate([module_size] * model_depth):
       for j in range(module_length):
-          x = keras.layers.Conv2D(32*2**min(i, 3), kernel_size=3, padding='same', kernel_initializer='he_uniform')(x)
-          x = keras.layers.BatchNormalization()(x)
-          x = keras.layers.Activation('relu')(x)
-      x = keras.layers.MaxPooling2D(2)(x)
+          output_tensor = keras.layers.Conv2D(32*2**min(i, 3), kernel_size=3, padding='same', kernel_initializer='he_uniform')(output_tensor)
+          output_tensor = keras.layers.BatchNormalization()(output_tensor)
+          output_tensor = keras.layers.Activation('relu')(output_tensor)
+      output_tensor = keras.layers.MaxPooling2D(2)(output_tensor)
 
-  x = keras.layers.Flatten()(x)
-  x = [keras.layers.Dense(captcha_num_symbols, activation='softmax', name='char_%d'%(i+1))(x) for i in range(captcha_length)]
-  model = keras.Model(inputs=input_tensor, outputs=x)
-
+  output_tensor = keras.layers.Flatten()(output_tensor)
+  output_tensor = [keras.layers.Dense(captcha_num_symbols, activation='softmax', name='char_%d'%(i+1))(output_tensor) for i in range(max_captcha_length)]
+  model = keras.Model(inputs=input_tensor, outputs=output_tensor)
   return model
 
-# A Sequence represents a dataset for training in Keras
-# In this case, we have a folder full of images
-# Elements of a Sequence are *batches* of images, of some size batch_size
+
+# To train our model we need to use a class that signifies our folder of training images (batches of captchas to train)
 class ImageSequence(keras.utils.Sequence):
-    def __init__(self, directory_name, batch_size, captcha_length, captcha_symbols, captcha_width, captcha_height):
+    def __init__(self, directory_name, batch_size, max_captcha_length, captcha_symbols, captcha_width, captcha_height):
+        # Set items in class
         self.directory_name = directory_name
         self.batch_size = batch_size
-        self.captcha_length = captcha_length
+        self.max_captcha_length = max_captcha_length
         self.captcha_symbols = captcha_symbols
         self.captcha_width = captcha_width
         self.captcha_height = captcha_height
-
         file_list = os.listdir(self.directory_name)
         self.files = dict(zip(map(lambda x: x.split('.')[0], file_list), file_list))
         self.used_files = []
@@ -51,31 +50,26 @@ class ImageSequence(keras.utils.Sequence):
 
     def __getitem__(self, idx):
         X = numpy.zeros((self.batch_size, self.captcha_height, self.captcha_width, 3), dtype=numpy.float32)
-        y = [numpy.zeros((self.batch_size, len(self.captcha_symbols)), dtype=numpy.uint8) for i in range(self.captcha_length)]
+        y = [numpy.zeros((self.batch_size, len(self.captcha_symbols)), dtype=numpy.uint8) for i in range(self.max_captcha_length)]
 
         for i in range(self.batch_size):
+            # If there is only one image left, break so we don't get an index error
+            if len(list(self.files.keys())) == 1:
+                break
             random_image_label = random.choice(list(self.files.keys()))
             random_image_file = self.files[random_image_label]
-
-            # We've used this image now, so we can't repeat it in this iteration
+            # Pop off image as we have used it
             self.used_files.append(self.files.pop(random_image_label))
-
-            # We have to scale the input pixel values to the range [0, 1] for
-            # Keras so we divide by 255 since the image is 8-bit RGB
+            # Divide by 255 to scale the 8-bit RBG input from [0 -> 1] for keras
             raw_data = cv2.imread(os.path.join(self.directory_name, random_image_file))
             rgb_data = cv2.cvtColor(raw_data, cv2.COLOR_BGR2RGB)
             processed_data = numpy.array(rgb_data) / 255.0
             X[i] = processed_data
-
-            # We have a little hack here - we save captchas as TEXT_num.png if there is more than one captcha with the text "TEXT"
-            # So the real label should have the "_num" stripped out.
-
-            #random_image_label = random_image_label.split('_')[0]
+            # We add '$' to the right-side of the label until it is length 6 (if it is length 6 already, we don't do anything)
             random_image_label = '{:$<6}'.format(random_image_label.split('_')[0])
             for j, ch in enumerate(random_image_label):
                 y[j][i, :] = 0
                 y[j][i, self.captcha_symbols.find(ch)] = 1
-
         return X, y
 
 def main():
