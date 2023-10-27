@@ -32,17 +32,22 @@ def getCSV(csv_url):
     else:
          print('Error: Invalid response from API call to get CSV: {0}'.format(response))
 
+
 def getImages(base_url, csv, captcha_directory):
     for row in csv:
         filename = row[0]
-        response = requests.get('{0}&myfilename={1}'.format(base_url, filename))
-        if response.status_code == 200:
-            image_path = os.path.join(captcha_directory, filename)
-            with open(image_path, 'wb') as image:
-                image.write(response.content)
-                print('Stored image {0}'.format(filename))
-        else:
-             print('Error: Invalid response from API call to get image: {0}'.format(response))
+        # Keep doing GET requests until we get a successful response
+        while True:
+            response = requests.get('{0}&myfilename={1}'.format(base_url, filename))
+            if response.status_code == 200:
+                image_path = os.path.join(captcha_directory, filename)
+                with open(image_path, 'wb') as image:
+                    image.write(response.content)
+                    print('Stored image {0}'.format(filename))
+                break
+            else:
+                print('Error: Invalid response from API call to get image: {0}'.format(filename))
+                print('Retrying...')
 
 
 def main():
